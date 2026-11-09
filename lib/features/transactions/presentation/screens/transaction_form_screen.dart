@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/validators.dart';
+import '../../../../core/utils/vnd_input_formatter.dart';
 import '../../application/transaction_controller.dart';
 import '../../domain/models/transaction_categories.dart';
 import '../../domain/models/transaction_entry.dart';
 import '../../domain/models/transaction_type.dart';
+import '../widgets/transaction_category_visuals.dart';
 
 class TransactionFormScreen extends StatefulWidget {
   const TransactionFormScreen({this.transaction, super.key});
@@ -42,7 +44,9 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     _selectedDate = transaction?.transactionDate ?? DateTime.now();
     _titleController = TextEditingController(text: transaction?.title ?? '');
     _amountController = TextEditingController(
-      text: transaction?.amount.toString() ?? '',
+      text: transaction == null
+          ? ''
+          : CurrencyFormatter.formatNumber(transaction.amount),
     );
     _noteController = TextEditingController(text: transaction?.note ?? '');
   }
@@ -68,7 +72,13 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.spaceMd),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(
+            AppSizes.spaceMd,
+            AppSizes.spaceMd,
+            AppSizes.spaceMd,
+            AppSizes.spaceMd + MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
@@ -76,6 +86,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
               ),
               child: Form(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -85,30 +96,40 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: AppSizes.spaceSm),
-                    SegmentedButton<TransactionType>(
-                      segments: const [
-                        ButtonSegment(
-                          value: TransactionType.expense,
-                          label: Text(AppStrings.expense),
-                          icon: Icon(Icons.north_east_rounded),
-                        ),
-                        ButtonSegment(
-                          value: TransactionType.income,
-                          label: Text(AppStrings.income),
-                          icon: Icon(Icons.south_west_rounded),
-                        ),
-                      ],
-                      selected: {_selectedType},
-                      onSelectionChanged: isMutating
-                          ? null
-                          : (selection) {
-                              final type = selection.single;
-                              setState(() {
-                                _selectedType = type;
-                                _selectedCategory =
-                                    TransactionCategories.forType(type).first;
-                              });
-                            },
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final compact = constraints.maxWidth < 360;
+                        return SegmentedButton<TransactionType>(
+                          segments: [
+                            ButtonSegment(
+                              value: TransactionType.expense,
+                              label: Text(compact ? 'Chi' : AppStrings.expense),
+                              icon: compact
+                                  ? null
+                                  : const Icon(Icons.north_east_rounded),
+                            ),
+                            ButtonSegment(
+                              value: TransactionType.income,
+                              label: Text(compact ? 'Thu' : AppStrings.income),
+                              icon: compact
+                                  ? null
+                                  : const Icon(Icons.south_west_rounded),
+                            ),
+                          ],
+                          selected: {_selectedType},
+                          onSelectionChanged: isMutating
+                              ? null
+                              : (selection) {
+                                  final type = selection.single;
+                                  setState(() {
+                                    _selectedType = type;
+                                    _selectedCategory =
+                                        TransactionCategories.forType(type)
+                                            .first;
+                                  });
+                                },
+                        );
+                      },
                     ),
                     const SizedBox(height: AppSizes.spaceLg),
                     TextFormField(
@@ -116,6 +137,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                       controller: _titleController,
                       enabled: !isMutating,
                       textInputAction: TextInputAction.next,
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       decoration: const InputDecoration(
                         labelText: 'Tên giao dịch',
                         hintText: 'Ví dụ: Ăn trưa',
@@ -132,8 +154,10 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                       controller: _amountController,
                       enabled: !isMutating,
                       keyboardType: TextInputType.number,
-                      textInputAction: TextInputAction.next,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: const [VndInputFormatter()],
+                      onFieldSubmitted: (_) => FocusScope.of(context).unfocus(),
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       decoration: const InputDecoration(
                         labelText: 'Số tiền',
                         hintText: '0',
@@ -150,13 +174,22 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                         labelText: 'Danh mục',
                         prefixIcon: Icon(Icons.category_outlined),
                       ),
-                      items: [
-                        for (final category in categories)
-                          DropdownMenuItem(
-                            value: category,
-                            child: Text(category),
+                      items: categories.map((category) {
+                        final visual = TransactionCategoryVisuals.resolve(
+                          context,
+                          category,
+                        );
+                        return DropdownMenuItem(
+                          value: category,
+                          child: Row(
+                            children: [
+                              Icon(visual.icon, size: 20, color: visual.color),
+                              const SizedBox(width: AppSizes.spaceSm),
+                              Text(category),
+                            ],
                           ),
-                      ],
+                        );
+                      }).toList(),
                       onChanged: isMutating
                           ? null
                           : (value) {
@@ -188,6 +221,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
                       minLines: 3,
                       maxLines: 5,
                       maxLength: 250,
+                      onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       decoration: const InputDecoration(
                         labelText: 'Ghi chú (không bắt buộc)',
                         alignLabelWithHint: true,
@@ -239,7 +273,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
     final transaction = TransactionEntry(
       id: existing?.id ?? 'transaction-${now.microsecondsSinceEpoch}',
       title: _titleController.text.trim(),
-      amount: int.parse(_amountController.text),
+      amount: CurrencyFormatter.parseVnd(_amountController.text)!,
       type: _selectedType,
       category: _selectedCategory,
       transactionDate: DateTime(

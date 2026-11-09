@@ -1,5 +1,5 @@
 abstract final class CurrencyFormatter {
-  static String formatVnd(int amount) {
+  static String formatNumber(int amount) {
     final isNegative = amount < 0;
     final digits = amount.abs().toString();
     final buffer = StringBuffer();
@@ -11,6 +11,14 @@ abstract final class CurrencyFormatter {
       buffer.write(digits[index]);
     }
 
-    return '${isNegative ? '-' : ''}$buffer ₫';
+    return '${isNegative ? '-' : ''}$buffer';
+  }
+
+  static String formatVnd(int amount) => '${formatNumber(amount)} ₫';
+
+  static int? parseVnd(String value) {
+    final digits = value.replaceAll(RegExp('[^0-9]'), '');
+    if (digits.isEmpty) return null;
+    return int.tryParse(digits);
   }
 }

@@ -5,6 +5,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../domain/models/transaction_entry.dart';
+import 'transaction_category_visuals.dart';
 
 class TransactionCard extends StatelessWidget {
   const TransactionCard({
@@ -19,7 +20,14 @@ class TransactionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = transaction.type.isIncome;
-    final color = isIncome ? AppColors.income : AppColors.expense;
+    final brightness = Theme.of(context).brightness;
+    final amountColor = isIncome
+        ? AppColors.incomeFor(brightness)
+        : AppColors.expenseFor(brightness);
+    final categoryVisual = TransactionCategoryVisuals.resolve(
+      context,
+      transaction.category,
+    );
     final amount = CurrencyFormatter.formatVnd(transaction.amount);
 
     return Card(
@@ -32,13 +40,9 @@ class TransactionCard extends StatelessWidget {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor: color.withValues(alpha: 0.12),
-                foregroundColor: color,
-                child: Icon(
-                  isIncome
-                      ? Icons.south_west_rounded
-                      : Icons.north_east_rounded,
-                ),
+                backgroundColor: categoryVisual.color.withValues(alpha: 0.14),
+                foregroundColor: categoryVisual.color,
+                child: Icon(categoryVisual.icon),
               ),
               const SizedBox(width: AppSizes.spaceMd),
               Expanded(
@@ -66,10 +70,19 @@ class TransactionCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSizes.spaceSm),
-              Text(
-                '${isIncome ? '+' : '-'}$amount',
-                style: Theme.of(context).textTheme.titleSmall
-                    ?.copyWith(color: color, fontWeight: FontWeight.w700),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 112),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '${isIncome ? '+' : '-'}$amount',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: amountColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

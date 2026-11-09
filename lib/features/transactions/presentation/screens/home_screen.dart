@@ -97,26 +97,9 @@ class _HomeBody extends StatelessWidget {
                   const SizedBox(height: AppSizes.spaceLg),
                   _BalanceCard(amount: controller.currentBalance),
                   const SizedBox(height: AppSizes.spaceMd),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _SummaryCard(
-                          title: AppStrings.totalIncome,
-                          amount: controller.totalIncome,
-                          icon: Icons.south_west_rounded,
-                          color: AppColors.income,
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.spaceMd),
-                      Expanded(
-                        child: _SummaryCard(
-                          title: AppStrings.totalExpense,
-                          amount: controller.totalExpense,
-                          icon: Icons.north_east_rounded,
-                          color: AppColors.expense,
-                        ),
-                      ),
-                    ],
+                  _SummaryCards(
+                    income: controller.totalIncome,
+                    expense: controller.totalExpense,
                   ),
                   if (controller.errorMessage != null) ...[
                     const SizedBox(height: AppSizes.spaceMd),
@@ -134,8 +117,11 @@ class _HomeBody extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: AppSizes.spaceXl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: AppSizes.spaceMd,
+                    runSpacing: AppSizes.spaceSm,
                     children: [
                       Text(
                         AppStrings.recentTransactions,
@@ -185,6 +171,53 @@ class _HomeBody extends StatelessWidget {
   }
 }
 
+class _SummaryCards extends StatelessWidget {
+  const _SummaryCards({required this.income, required this.expense});
+
+  final int income;
+  final int expense;
+
+  @override
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final incomeCard = _SummaryCard(
+      title: AppStrings.totalIncome,
+      amount: income,
+      icon: Icons.south_west_rounded,
+      color: AppColors.incomeFor(brightness),
+    );
+    final expenseCard = _SummaryCard(
+      title: AppStrings.totalExpense,
+      amount: expense,
+      icon: Icons.north_east_rounded,
+      color: AppColors.expenseFor(brightness),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 360) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              incomeCard,
+              const SizedBox(height: AppSizes.spaceSm),
+              expenseCard,
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            Expanded(child: incomeCard),
+            const SizedBox(width: AppSizes.spaceMd),
+            Expanded(child: expenseCard),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _BalanceCard extends StatelessWidget {
   const _BalanceCard({required this.amount});
 
@@ -197,7 +230,10 @@ class _BalanceCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.secondary],
+          colors: [
+            colorScheme.primaryContainer,
+            colorScheme.secondaryContainer,
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -211,13 +247,13 @@ class _BalanceCard extends StatelessWidget {
             Text(
               AppStrings.currentBalance,
               style: Theme.of(context).textTheme.bodyLarge
-                  ?.copyWith(color: colorScheme.onPrimary),
+                  ?.copyWith(color: colorScheme.onPrimaryContainer),
             ),
             const SizedBox(height: AppSizes.spaceSm),
             Text(
               CurrencyFormatter.formatVnd(amount),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: colorScheme.onPrimary,
+                color: colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.w800,
               ),
             ),

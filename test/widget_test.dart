@@ -60,6 +60,9 @@ void main() {
 
     expect(find.text('Bán đồ cũ'), findsOneWidget);
 
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Bán đồ cũ'));
     await tester.pumpAndSettle();
 
@@ -95,5 +98,50 @@ void main() {
     expect(find.text(AppStrings.appName), findsOneWidget);
     expect(find.text('Bán đồ cũ đã sửa'), findsNothing);
     expect(find.text('Đã xóa giao dịch thành công.'), findsOneWidget);
+  });
+
+  testWidgets('compact phone layout renders without overflow', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(const AppProviders(child: FinTrackApp()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(AppStrings.currentBalance), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('add-transaction-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chi'), findsOneWidget);
+    expect(find.text('Thu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tablet layout follows system dark mode without overflow', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1024, 800));
+    tester.binding.platformDispatcher.platformBrightnessTestValue =
+        Brightness.dark;
+    addTearDown(() async {
+      tester.binding.platformDispatcher.clearPlatformBrightnessTestValue();
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    await tester.pumpWidget(const AppProviders(child: FinTrackApp()));
+    await tester.pumpAndSettle();
+
+    final scaffoldContext = tester.element(find.byType(Scaffold).first);
+    expect(Theme.of(scaffoldContext).brightness, Brightness.dark);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text(AppStrings.viewTransactions));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.transactionHistory), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

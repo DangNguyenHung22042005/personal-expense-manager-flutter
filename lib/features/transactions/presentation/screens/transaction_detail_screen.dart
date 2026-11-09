@@ -10,6 +10,7 @@ import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/app_error_state.dart';
 import '../../application/transaction_controller.dart';
 import '../../domain/models/transaction_entry.dart';
+import '../widgets/transaction_category_visuals.dart';
 
 class TransactionDetailScreen extends StatelessWidget {
   const TransactionDetailScreen({required this.transactionId, super.key});
@@ -31,7 +32,14 @@ class TransactionDetailScreen extends StatelessWidget {
     }
 
     final isIncome = transaction.type.isIncome;
-    final color = isIncome ? AppColors.income : AppColors.expense;
+    final brightness = Theme.of(context).brightness;
+    final color = isIncome
+        ? AppColors.incomeFor(brightness)
+        : AppColors.expenseFor(brightness);
+    final categoryVisual = TransactionCategoryVisuals.resolve(
+      context,
+      transaction.category,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -76,14 +84,11 @@ class TransactionDetailScreen extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 28,
-                          backgroundColor: color.withValues(alpha: 0.16),
-                          foregroundColor: color,
-                          child: Icon(
-                            isIncome
-                                ? Icons.south_west_rounded
-                                : Icons.north_east_rounded,
-                            size: 30,
+                          backgroundColor: categoryVisual.color.withValues(
+                            alpha: 0.16,
                           ),
+                          foregroundColor: categoryVisual.color,
+                          child: Icon(categoryVisual.icon, size: 30),
                         ),
                         const SizedBox(height: AppSizes.spaceMd),
                         Text(

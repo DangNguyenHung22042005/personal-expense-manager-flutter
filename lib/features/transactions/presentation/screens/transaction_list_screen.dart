@@ -59,30 +59,35 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSizes.spaceMd,
-                AppSizes.spaceSm,
-                AppSizes.spaceMd,
-                AppSizes.spaceSm,
-              ),
-              child: TextField(
-                key: const Key('transaction-search-field'),
-                controller: _searchController,
-                onChanged: controller.setSearchQuery,
-                decoration: InputDecoration(
-                  hintText: 'Tìm tên, danh mục hoặc ghi chú',
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  suffixIcon: controller.searchQuery.isEmpty
-                      ? null
-                      : IconButton(
-                          tooltip: 'Xóa từ khóa',
-                          onPressed: () {
-                            _searchController.clear();
-                            controller.setSearchQuery('');
-                          },
-                          icon: const Icon(Icons.close_rounded),
-                        ),
+            _ResponsiveWidth(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSizes.spaceMd,
+                  AppSizes.spaceSm,
+                  AppSizes.spaceMd,
+                  AppSizes.spaceSm,
+                ),
+                child: TextField(
+                  key: const Key('transaction-search-field'),
+                  controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  onChanged: controller.setSearchQuery,
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                  onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                  decoration: InputDecoration(
+                    hintText: 'Tìm tên, danh mục hoặc ghi chú',
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: controller.searchQuery.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: 'Xóa từ khóa',
+                            onPressed: () {
+                              _searchController.clear();
+                              controller.setSearchQuery('');
+                            },
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                  ),
                 ),
               ),
             ),
@@ -109,58 +114,62 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 56,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spaceMd),
-        children: [
-          ChoiceChip(
-            label: const Text(AppStrings.all),
-            selected: controller.selectedType == null,
-            onSelected: (_) => controller.setTypeFilter(null),
-          ),
-          const SizedBox(width: AppSizes.spaceSm),
-          ChoiceChip(
-            label: const Text(AppStrings.income),
-            selected: controller.selectedType == TransactionType.income,
-            onSelected: (_) => controller.setTypeFilter(TransactionType.income),
-          ),
-          const SizedBox(width: AppSizes.spaceSm),
-          ChoiceChip(
-            label: const Text(AppStrings.expense),
-            selected: controller.selectedType == TransactionType.expense,
-            onSelected: (_) =>
-                controller.setTypeFilter(TransactionType.expense),
-          ),
-          const SizedBox(width: AppSizes.spaceMd),
-          DropdownButton<String?>(
-            key: const Key('category-filter'),
-            value: controller.selectedCategory,
-            underline: const SizedBox.shrink(),
-            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-            items: [
-              const DropdownMenuItem<String?>(
-                value: null,
-                child: Text('Mọi danh mục'),
-              ),
-              for (final category in controller.categories)
-                DropdownMenuItem<String?>(
-                  value: category,
-                  child: Text(category),
-                ),
-            ],
-            onChanged: controller.setCategoryFilter,
-          ),
-          if (controller.hasActiveFilters) ...[
-            const SizedBox(width: AppSizes.spaceSm),
-            TextButton.icon(
-              onPressed: controller.clearFilters,
-              icon: const Icon(Icons.filter_alt_off_outlined),
-              label: const Text('Xóa lọc'),
+    return _ResponsiveWidth(
+      child: SizedBox(
+        height: 56,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.spaceMd),
+          children: [
+            ChoiceChip(
+              label: const Text(AppStrings.all),
+              selected: controller.selectedType == null,
+              onSelected: (_) => controller.setTypeFilter(null),
             ),
+            const SizedBox(width: AppSizes.spaceSm),
+            ChoiceChip(
+              label: const Text(AppStrings.income),
+              selected: controller.selectedType == TransactionType.income,
+              onSelected: (_) =>
+                  controller.setTypeFilter(TransactionType.income),
+            ),
+            const SizedBox(width: AppSizes.spaceSm),
+            ChoiceChip(
+              label: const Text(AppStrings.expense),
+              selected: controller.selectedType == TransactionType.expense,
+              onSelected: (_) =>
+                  controller.setTypeFilter(TransactionType.expense),
+            ),
+            const SizedBox(width: AppSizes.spaceMd),
+            DropdownButton<String?>(
+              key: const Key('category-filter'),
+              value: controller.selectedCategory,
+              underline: const SizedBox.shrink(),
+              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Mọi danh mục'),
+                ),
+                for (final category in controller.categories)
+                  DropdownMenuItem<String?>(
+                    value: category,
+                    child: Text(category),
+                  ),
+              ],
+              onChanged: controller.setCategoryFilter,
+            ),
+            if (controller.hasActiveFilters) ...[
+              const SizedBox(width: AppSizes.spaceSm),
+              TextButton.icon(
+                onPressed: controller.clearFilters,
+                icon: const Icon(Icons.filter_alt_off_outlined),
+                label: const Text('Xóa lọc'),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -212,6 +221,7 @@ class _TransactionListBody extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: controller.loadTransactions,
       child: ListView.builder(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.fromLTRB(
           AppSizes.spaceMd,
           AppSizes.spaceSm,
@@ -221,16 +231,39 @@ class _TransactionListBody extends StatelessWidget {
         itemCount: transactions.length,
         itemBuilder: (context, index) {
           final transaction = transactions[index];
-          return TransactionCard(
-            key: Key('transaction-card-${transaction.id}'),
-            transaction: transaction,
-            onTap: () => Navigator.pushNamed(
-              context,
-              AppRoutes.transactionDetail,
-              arguments: transaction.id,
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSizes.maxContentWidth,
+              ),
+              child: TransactionCard(
+                key: Key('transaction-card-${transaction.id}'),
+                transaction: transaction,
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  AppRoutes.transactionDetail,
+                  arguments: transaction.id,
+                ),
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ResponsiveWidth extends StatelessWidget {
+  const _ResponsiveWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSizes.maxContentWidth),
+        child: child,
       ),
     );
   }
