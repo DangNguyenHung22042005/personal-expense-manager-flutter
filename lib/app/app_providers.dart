@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/transactions/application/transaction_controller.dart';
 import '../features/transactions/data/repositories/in_memory_transaction_repository.dart';
 import '../features/transactions/data/seeds/sample_transactions.dart';
 import '../features/transactions/domain/repositories/transaction_repository.dart';
@@ -23,6 +24,11 @@ class AppProviders extends StatelessWidget {
           create: (_) => InMemoryTransactionRepository(
             initialTransactions: SampleTransactions.create(),
           ),
+        ),
+        ChangeNotifierProvider<TransactionController>(
+          create: (context) => TransactionController(
+            repository: context.read<TransactionRepository>(),
+          )..loadTransactions(),
         ),
       ],
       child: child,
