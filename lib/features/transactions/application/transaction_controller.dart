@@ -37,6 +37,13 @@ class TransactionController extends ChangeNotifier {
   List<TransactionEntry> get transactions =>
       List<TransactionEntry>.unmodifiable(_transactions);
 
+  TransactionEntry? getTransactionById(String id) {
+    for (final transaction in _transactions) {
+      if (transaction.id == id) return transaction;
+    }
+    return null;
+  }
+
   List<String> get categories {
     final values =
         _transactions

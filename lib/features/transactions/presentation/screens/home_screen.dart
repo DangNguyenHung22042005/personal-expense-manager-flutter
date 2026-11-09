@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../app/app_routes.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -6,26 +7,78 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_error_state.dart';
+import '../../../../core/widgets/app_loading.dart';
+import '../../application/transaction_controller.dart';
+import '../widgets/transaction_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = context.watch<TransactionController>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           AppStrings.appName,
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Tải lại dữ liệu',
+            onPressed: controller.isLoading
+                ? null
+                : controller.loadTransactions,
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
       ),
-      body: SafeArea(
+      body: _HomeBody(controller: controller),
+      floatingActionButton: FloatingActionButton.extended(
+        key: const Key('add-transaction-button'),
+        onPressed: () =>
+            Navigator.pushNamed(context, AppRoutes.transactionForm),
+        icon: const Icon(Icons.add_rounded),
+        label: const Text(AppStrings.addTransaction),
+      ),
+    );
+  }
+}
+
+class _HomeBody extends StatelessWidget {
+  const _HomeBody({required this.controller});
+
+  final TransactionController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    if (controller.isLoading && controller.transactions.isEmpty) {
+      return const AppLoading();
+    }
+
+    if (controller.errorMessage != null && controller.transactions.isEmpty) {
+      return Center(
+        child: AppErrorState(
+          message: controller.errorMessage!,
+          onRetry: controller.loadTransactions,
+        ),
+      );
+    }
+
+    final recentTransactions = controller.transactions.take(5).toList();
+
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: controller.loadTransactions,
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(
             AppSizes.spaceMd,
             AppSizes.spaceSm,
             AppSizes.spaceMd,
-            AppSizes.spaceXl,
+            96,
           ),
           child: Center(
             child: ConstrainedBox(
@@ -42,27 +95,44 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: AppSizes.spaceLg),
-                  const _BalanceCard(),
+                  _BalanceCard(amount: controller.currentBalance),
                   const SizedBox(height: AppSizes.spaceMd),
-                  const Row(
+                  Row(
                     children: [
                       Expanded(
                         child: _SummaryCard(
                           title: AppStrings.totalIncome,
+                          amount: controller.totalIncome,
                           icon: Icons.south_west_rounded,
                           color: AppColors.income,
                         ),
                       ),
-                      SizedBox(width: AppSizes.spaceMd),
+                      const SizedBox(width: AppSizes.spaceMd),
                       Expanded(
                         child: _SummaryCard(
                           title: AppStrings.totalExpense,
+                          amount: controller.totalExpense,
                           icon: Icons.north_east_rounded,
                           color: AppColors.expense,
                         ),
                       ),
                     ],
                   ),
+                  if (controller.errorMessage != null) ...[
+                    const SizedBox(height: AppSizes.spaceMd),
+                    Card(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: ListTile(
+                        leading: const Icon(Icons.error_outline),
+                        title: Text(controller.errorMessage!),
+                        trailing: IconButton(
+                          tooltip: AppStrings.retry,
+                          onPressed: controller.loadTransactions,
+                          icon: const Icon(Icons.refresh_rounded),
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: AppSizes.spaceXl),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,12 +151,30 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const Card(
-                    child: AppEmptyState(
-                      title: AppStrings.noTransactionsTitle,
-                      message: AppStrings.noTransactionsMessage,
-                    ),
-                  ),
+                  const SizedBox(height: AppSizes.spaceSm),
+                  if (recentTransactions.isEmpty)
+                    Card(
+                      child: AppEmptyState(
+                        title: AppStrings.noTransactionsTitle,
+                        message: AppStrings.noTransactionsMessage,
+                        actionLabel: AppStrings.addTransaction,
+                        onAction: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.transactionForm,
+                        ),
+                      ),
+                    )
+                  else
+                    for (final transaction in recentTransactions)
+                      TransactionCard(
+                        key: Key('transaction-card-${transaction.id}'),
+                        transaction: transaction,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.transactionDetail,
+                          arguments: transaction.id,
+                        ),
+                      ),
                 ],
               ),
             ),
@@ -98,7 +186,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _BalanceCard extends StatelessWidget {
-  const _BalanceCard();
+  const _BalanceCard({required this.amount});
+
+  final int amount;
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +197,7 @@ class _BalanceCard extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.primaryContainer],
+          colors: [colorScheme.primary, colorScheme.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -125,7 +215,7 @@ class _BalanceCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.spaceSm),
             Text(
-              CurrencyFormatter.formatVnd(0),
+              CurrencyFormatter.formatVnd(amount),
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.w800,
@@ -141,11 +231,13 @@ class _BalanceCard extends StatelessWidget {
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({
     required this.title,
+    required this.amount,
     required this.icon,
     required this.color,
   });
 
   final String title;
+  final int amount;
   final IconData icon;
   final Color color;
 
@@ -165,7 +257,7 @@ class _SummaryCard extends StatelessWidget {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                CurrencyFormatter.formatVnd(0),
+                CurrencyFormatter.formatVnd(amount),
                 style: Theme.of(context).textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.w700, color: color),
               ),
