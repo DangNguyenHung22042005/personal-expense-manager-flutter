@@ -5,6 +5,7 @@ import '../../../../app/app_routes.dart';
 import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../application/user_controller.dart';
+import '../../domain/models/admin_user.dart';
 import '../widgets/user_avatar.dart';
 
 class UserDetailScreen extends StatefulWidget {
@@ -18,11 +19,18 @@ class UserDetailScreen extends StatefulWidget {
 
 class _UserDetailScreenState extends State<UserDetailScreen> {
   bool _showPassword = false;
+  late String _email;
+
+  @override
+  void initState() {
+    super.initState();
+    _email = widget.email;
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<UserController>();
-    final user = controller.findByEmail(widget.email);
+    final user = controller.findByEmail(_email);
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: const Text(AppStrings.userDetail)),
@@ -37,11 +45,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
           IconButton(
             key: const Key('edit-user-button'),
             tooltip: AppStrings.editUser,
-            onPressed: () => Navigator.pushNamed(
-              context,
-              AppRoutes.userForm,
-              arguments: user,
-            ),
+            onPressed: () => _edit(context, user),
             icon: const Icon(Icons.edit_outlined),
           ),
           IconButton(
@@ -128,6 +132,17 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _edit(BuildContext context, AdminUser user) async {
+    final updatedEmail = await Navigator.pushNamed<String>(
+      context,
+      AppRoutes.userForm,
+      arguments: user,
+    );
+    if (updatedEmail != null && mounted) {
+      setState(() => _email = updatedEmail);
+    }
   }
 
   Future<void> _delete(BuildContext context, String email) async {

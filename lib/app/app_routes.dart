@@ -27,7 +27,7 @@ abstract final class AppRoutes {
         builder: (_) => UserDetailScreen(email: settings.arguments! as String),
         settings: settings,
       ),
-      userForm => MaterialPageRoute<bool>(
+      userForm => MaterialPageRoute<String>(
         builder: (_) => UserFormScreen(user: settings.arguments as AdminUser?),
         settings: settings,
       ),

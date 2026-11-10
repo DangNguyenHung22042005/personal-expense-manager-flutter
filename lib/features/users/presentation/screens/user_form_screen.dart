@@ -270,6 +270,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
         ),
       ),
     );
-    if (success) Navigator.pop(context, true);
+    if (success) Navigator.pop(context, user.email);
   }
 }
