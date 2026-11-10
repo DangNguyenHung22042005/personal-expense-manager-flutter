@@ -9,6 +9,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_error_state.dart';
 import '../../../../core/widgets/app_loading.dart';
+import '../../../auth/application/auth_controller.dart';
 import '../../application/transaction_controller.dart';
 import '../widgets/transaction_card.dart';
 
@@ -33,6 +34,12 @@ class HomeScreen extends StatelessWidget {
                 : controller.loadTransactions,
             icon: const Icon(Icons.refresh_rounded),
           ),
+          IconButton(
+            key: const Key('logout-button'),
+            tooltip: AppStrings.signOut,
+            onPressed: () => _confirmSignOut(context),
+            icon: const Icon(Icons.logout_rounded),
+          ),
         ],
       ),
       body: _HomeBody(controller: controller),
@@ -44,6 +51,31 @@ class HomeScreen extends StatelessWidget {
         label: const Text(AppStrings.addTransaction),
       ),
     );
+  }
+
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(AppStrings.signOut),
+        content: const Text('Bạn có chắc muốn đăng xuất khỏi FinTrack không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(AppStrings.cancel),
+          ),
+          FilledButton(
+            key: const Key('confirm-logout-button'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(AppStrings.signOut),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthController>().signOut();
+    }
   }
 }
 

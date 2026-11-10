@@ -4,13 +4,70 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_expense_manager/app/app.dart';
 import 'package:personal_expense_manager/app/app_providers.dart';
 import 'package:personal_expense_manager/core/constants/app_strings.dart';
+import 'package:personal_expense_manager/core/constants/demo_account.dart';
+
+Future<void> signInWithDemoAccount(WidgetTester tester) async {
+  expect(find.text(AppStrings.loginTitle), findsOneWidget);
+  await tester.enterText(
+    find.byKey(const Key('login-username-field')),
+    DemoAccount.username,
+  );
+  await tester.enterText(
+    find.byKey(const Key('login-password-field')),
+    DemoAccount.password,
+  );
+  tester.testTextInput.hide();
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.byKey(const Key('login-button')));
+  await tester.tap(find.byKey(const Key('login-button')));
+  await tester.pumpAndSettle();
+
+  expect(find.text(AppStrings.currentBalance), findsOneWidget);
+}
 
 void main() {
+  testWidgets('login rejects invalid credentials and supports sign out', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const AppProviders(child: FinTrackApp()));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('login-username-field')),
+      DemoAccount.username,
+    );
+    await tester.enterText(
+      find.byKey(const Key('login-password-field')),
+      'wrong-password',
+    );
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('login-button')));
+    await tester.tap(find.byKey(const Key('login-button')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Tên đăng nhập hoặc mật khẩu không đúng.'),
+      findsOneWidget,
+    );
+    expect(find.text(AppStrings.currentBalance), findsNothing);
+
+    await signInWithDemoAccount(tester);
+    await tester.tap(find.byKey(const Key('logout-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-logout-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.loginTitle), findsOneWidget);
+    expect(find.text(AppStrings.currentBalance), findsNothing);
+  });
+
   testWidgets('dashboard, transaction list, and search use controller data', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const AppProviders(child: FinTrackApp()));
     await tester.pumpAndSettle();
+    await signInWithDemoAccount(tester);
 
     expect(find.text(AppStrings.appName), findsOneWidget);
     expect(find.text(AppStrings.currentBalance), findsOneWidget);
@@ -37,6 +94,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const AppProviders(child: FinTrackApp()));
     await tester.pumpAndSettle();
+    await signInWithDemoAccount(tester);
 
     await tester.tap(find.byKey(const Key('add-transaction-button')));
     await tester.pumpAndSettle();
@@ -110,6 +168,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    expect(find.text(AppStrings.loginTitle), findsOneWidget);
+    await signInWithDemoAccount(tester);
     expect(find.text(AppStrings.currentBalance), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('add-transaction-button')));
@@ -137,6 +197,8 @@ void main() {
     final scaffoldContext = tester.element(find.byType(Scaffold).first);
     expect(Theme.of(scaffoldContext).brightness, Brightness.dark);
     expect(tester.takeException(), isNull);
+
+    await signInWithDemoAccount(tester);
 
     await tester.tap(find.text(AppStrings.viewTransactions));
     await tester.pumpAndSettle();

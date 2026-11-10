@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../features/auth/application/auth_controller.dart';
+import '../features/auth/data/repositories/in_memory_auth_repository.dart';
+import '../features/auth/domain/repositories/auth_repository.dart';
 import '../features/transactions/application/transaction_controller.dart';
 import '../features/transactions/data/repositories/in_memory_transaction_repository.dart';
 import '../features/transactions/data/seeds/sample_transactions.dart';
@@ -20,6 +23,11 @@ class AppProviders extends StatelessWidget {
     return MultiProvider(
       providers: [
         Provider<AppConfig>.value(value: const AppConfig()),
+        Provider<AuthRepository>(create: (_) => InMemoryAuthRepository()),
+        ChangeNotifierProvider<AuthController>(
+          create: (context) =>
+              AuthController(repository: context.read<AuthRepository>()),
+        ),
         Provider<TransactionRepository>(
           create: (_) => InMemoryTransactionRepository(
             initialTransactions: SampleTransactions.create(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
+import '../features/auth/presentation/screens/auth_gate.dart';
 import 'app_config.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
@@ -22,7 +23,7 @@ class FinTrackApp extends StatelessWidget {
       locale: const Locale('vi', 'VN'),
       supportedLocales: const [Locale('vi', 'VN')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      initialRoute: AppRoutes.home,
+      home: const AuthGate(),
       onGenerateRoute: AppRoutes.onGenerateRoute,
     );
   }
