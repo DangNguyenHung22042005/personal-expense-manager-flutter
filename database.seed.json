@@ -1,0 +1,22 @@
+{
+  "users": {
+    "YW4ubmd1eWVuQGV4YW1wbGUuY29t": {
+      "email": "an.nguyen@example.com",
+      "matkhau": "an123456",
+      "hoten": "Nguyễn Văn An",
+      "hinhanh": ""
+    },
+    "YmluaC50cmFuQGV4YW1wbGUuY29t": {
+      "email": "binh.tran@example.com",
+      "matkhau": "binh123456",
+      "hoten": "Trần Ngọc Bình",
+      "hinhanh": ""
+    },
+    "Y2hpLmxlQGV4YW1wbGUuY29t": {
+      "email": "chi.le@example.com",
+      "matkhau": "chi123456",
+      "hoten": "Lê Minh Chi",
+      "hinhanh": ""
+    }
+  }
+}

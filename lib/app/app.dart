@@ -7,8 +7,8 @@ import 'app_config.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
 
-class FinTrackApp extends StatelessWidget {
-  const FinTrackApp({super.key});
+class UserAdminApp extends StatelessWidget {
+  const UserAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {

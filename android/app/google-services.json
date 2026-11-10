@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "81705856091",
+    "firebase_url": "https://user-admin-midterm-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "user-admin-midterm",
+    "storage_bucket": "user-admin-midterm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81705856091:android:df35ff44d05df60856237e",
+        "android_client_info": {
+          "package_name": "com.example.personal_expense_manager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_1C9dITpG7d_-OLfnMGxR8Y1vwj7LQlY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

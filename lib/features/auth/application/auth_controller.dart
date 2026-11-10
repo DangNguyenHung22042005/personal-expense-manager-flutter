@@ -21,10 +21,7 @@ class AuthController extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  Future<bool> signIn({
-    required String username,
-    required String password,
-  }) async {
+  Future<bool> signIn({required String email, required String password}) async {
     if (_isLoading) return false;
 
     _isLoading = true;
@@ -32,13 +29,10 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _currentUser = await repository.signIn(
-        username: username,
-        password: password,
-      );
+      _currentUser = await repository.signIn(email: email, password: password);
       return true;
     } on InvalidCredentialsException {
-      _errorMessage = 'Tên đăng nhập hoặc mật khẩu không đúng.';
+      _errorMessage = 'Email hoặc mật khẩu không đúng.';
       return false;
     } catch (error) {
       _errorMessage = 'Không thể đăng nhập: $error';

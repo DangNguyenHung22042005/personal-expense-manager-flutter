@@ -1,17 +1,18 @@
-# personal_expense_manager
+# UserAdmin
 
-A cross-platform personal income and expense management application built with Flutter.
+Ứng dụng Flutter quản trị người dùng, chạy trên web và thiết bị di động.
 
-## Getting Started
+## Tài khoản demo
 
-This project is a starting point for a Flutter application.
+- Email: `admin@gmail.com`
+- Mật khẩu: `admin123`
 
-A few resources to get you started if this is your first Flutter project:
+## Chức năng hiện tại
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Đăng nhập/đăng xuất phân hệ admin.
+- Thêm, hiển thị, sửa, xóa và tìm kiếm người dùng.
+- Chọn và xem trước ảnh đại diện trên web/mobile.
+- Dữ liệu thật trên Firebase Realtime Database thông qua `UserRepository`.
+- Model dữ liệu chỉ gồm `email`, `matkhau`, `hoten`, `hinhanh`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Xem [FIREBASE_SETUP.md](FIREBASE_SETUP.md) để tạo project, bật Authentication, cấu hình Realtime Database và xuất file JSON nộp bài.

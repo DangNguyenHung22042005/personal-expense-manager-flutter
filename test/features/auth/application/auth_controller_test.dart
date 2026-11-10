@@ -17,7 +17,7 @@ void main() {
   group('AuthController', () {
     test('exposes loading and authenticates valid credentials', () async {
       final signInFuture = controller.signIn(
-        username: DemoAccount.username,
+        email: DemoAccount.email,
         password: DemoAccount.password,
       );
 
@@ -31,16 +31,13 @@ void main() {
 
     test('stores a friendly error for invalid credentials', () async {
       final succeeded = await controller.signIn(
-        username: DemoAccount.username,
+        email: DemoAccount.email,
         password: 'wrong-password',
       );
 
       expect(succeeded, isFalse);
       expect(controller.isAuthenticated, isFalse);
-      expect(
-        controller.errorMessage,
-        'Tên đăng nhập hoặc mật khẩu không đúng.',
-      );
+      expect(controller.errorMessage, 'Email hoặc mật khẩu không đúng.');
 
       controller.clearError();
       expect(controller.errorMessage, isNull);
@@ -48,7 +45,7 @@ void main() {
 
     test('signs out the current user', () async {
       await controller.signIn(
-        username: DemoAccount.username,
+        email: DemoAccount.email,
         password: DemoAccount.password,
       );
 

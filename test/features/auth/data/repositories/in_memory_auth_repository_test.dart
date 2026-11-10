@@ -13,27 +13,27 @@ void main() {
   group('InMemoryAuthRepository', () {
     test('signs in with the demo administrator account', () async {
       final user = await repository.signIn(
-        username: DemoAccount.username,
+        email: DemoAccount.email,
         password: DemoAccount.password,
       );
 
       expect(user.id, 'demo-admin');
-      expect(user.username, DemoAccount.username);
+      expect(user.email, DemoAccount.email);
       expect(user.displayName, 'Quản trị viên');
     });
 
-    test('accepts surrounding spaces and username case differences', () async {
+    test('accepts surrounding spaces and email case differences', () async {
       final user = await repository.signIn(
-        username: '  ADMIN  ',
+        email: '  ADMIN@GMAIL.COM  ',
         password: DemoAccount.password,
       );
 
-      expect(user.username, DemoAccount.username);
+      expect(user.email, DemoAccount.email);
     });
 
     test('rejects invalid credentials', () async {
       await expectLater(
-        repository.signIn(username: 'admin', password: 'wrong-password'),
+        repository.signIn(email: 'admin@gmail.com', password: 'wrong-password'),
         throwsA(isA<InvalidCredentialsException>()),
       );
     });

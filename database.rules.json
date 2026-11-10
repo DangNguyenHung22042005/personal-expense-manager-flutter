@@ -1,0 +1,28 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      ".read": "auth != null",
+      "$userKey": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['email', 'matkhau', 'hoten', 'hinhanh'])",
+        "email": {
+          ".validate": "newData.isString() && newData.val().length > 3"
+        },
+        "matkhau": {
+          ".validate": "newData.isString() && newData.val().length >= 6"
+        },
+        "hoten": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "hinhanh": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

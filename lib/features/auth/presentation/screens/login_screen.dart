@@ -16,13 +16,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  Icons.account_balance_wallet_rounded,
+                                  Icons.admin_panel_settings_rounded,
                                   size: 38,
                                   color: colorScheme.onPrimaryContainer,
                                 ),
@@ -100,11 +100,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       CrossAxisAlignment.stretch,
                                   children: [
                                     TextFormField(
-                                      key: const Key('login-username-field'),
-                                      controller: _usernameController,
+                                      key: const Key('login-email-field'),
+                                      controller: _emailController,
                                       enabled: !authController.isLoading,
                                       autofillHints: const [
-                                        AutofillHints.username,
+                                        AutofillHints.email,
                                       ],
                                       textInputAction: TextInputAction.next,
                                       onChanged: (_) =>
@@ -112,14 +112,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       onTapOutside: (_) =>
                                           FocusScope.of(context).unfocus(),
                                       decoration: const InputDecoration(
-                                        labelText: AppStrings.username,
-                                        prefixIcon: Icon(
-                                          Icons.person_outline_rounded,
-                                        ),
+                                        labelText: AppStrings.email,
+                                        prefixIcon: Icon(Icons.email_outlined),
                                       ),
                                       validator: (value) => Validators.required(
                                         value,
-                                        fieldName: AppStrings.username,
+                                        fieldName: AppStrings.email,
                                       ),
                                     ),
                                     const SizedBox(height: AppSizes.spaceMd),
@@ -246,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   const SizedBox(height: AppSizes.spaceXs),
                                   const SelectableText(
-                                    '${DemoAccount.username} / ${DemoAccount.password}',
+                                    '${DemoAccount.email} / ${DemoAccount.password}',
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: AppSizes.spaceSm),
@@ -280,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _fillDemoCredentials() {
-    _usernameController.text = DemoAccount.username;
+    _emailController.text = DemoAccount.email;
     _passwordController.text = DemoAccount.password;
     context.read<AuthController>().clearError();
   }
@@ -290,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     await context.read<AuthController>().signIn(
-      username: _usernameController.text,
+      email: _emailController.text,
       password: _passwordController.text,
     );
   }

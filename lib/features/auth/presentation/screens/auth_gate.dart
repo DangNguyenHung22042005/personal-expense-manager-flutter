@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../transactions/presentation/screens/home_screen.dart';
+import '../../../users/presentation/screens/admin_home_screen.dart';
 import '../../application/auth_controller.dart';
 import 'login_screen.dart';
 
@@ -17,7 +17,7 @@ class AuthGate extends StatelessWidget {
       switchInCurve: Curves.easeOut,
       switchOutCurve: Curves.easeIn,
       child: isAuthenticated
-          ? const HomeScreen(key: ValueKey('home-screen'))
+          ? const AdminHomeScreen(key: ValueKey('home-screen'))
           : const LoginScreen(key: ValueKey('login-screen')),
     );
   }

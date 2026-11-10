@@ -7,7 +7,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>FinTrack</string>
+	<string>UserAdmin</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần quyền chọn ảnh đại diện cho người dùng.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

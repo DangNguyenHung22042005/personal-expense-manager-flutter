@@ -1,12 +1,12 @@
 class AppUser {
   const AppUser({
     required this.id,
-    required this.username,
+    required this.email,
     required this.displayName,
   });
 
   final String id;
-  final String username;
+  final String email;
   final String displayName;
 
   @override
@@ -14,10 +14,10 @@ class AppUser {
     return identical(this, other) ||
         other is AppUser &&
             id == other.id &&
-            username == other.username &&
+            email == other.email &&
             displayName == other.displayName;
   }
 
   @override
-  int get hashCode => Object.hash(id, username, displayName);
+  int get hashCode => Object.hash(id, email, displayName);
 }
